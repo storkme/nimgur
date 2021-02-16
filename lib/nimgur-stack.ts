@@ -1,6 +1,6 @@
 import { Construct, Stack, StackProps, Tags } from "@aws-cdk/core";
 import { Bucket } from "@aws-cdk/aws-s3";
-import { LambdaIntegration, RestApi, } from "@aws-cdk/aws-apigateway";
+import { Deployment, LambdaIntegration, Method, RestApi, Stage, } from "@aws-cdk/aws-apigateway";
 import { LogLevel, NodejsFunction } from "@aws-cdk/aws-lambda-nodejs";
 import { join } from "path";
 import { Runtime } from "@aws-cdk/aws-lambda";
@@ -11,6 +11,10 @@ import { Certificate } from "@aws-cdk/aws-certificatemanager";
 export class NimgurStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
+
+    if (!process.env.ARN_CERTIFICATE || !process.env.CDN_HOST) {
+      throw new Error('Missing ARN_CERTIFICATE and/or CDN_HOST env vars');
+    }
 
     // The code that defines your stack goes here
     Tags.of(scope).add("project", "nimgur");
@@ -29,7 +33,7 @@ export class NimgurStack extends Stack {
       runtime: Runtime.NODEJS_14_X,
       description: "nimgur upload function",
       environment: {
-        BUCKET_ARN: bucket.bucketArn,
+        BUCKET_ARN: bucket.bucketName,
         CDN_HOST: process.env.CDN_HOST
       },
       bundling: {
@@ -39,19 +43,52 @@ export class NimgurStack extends Stack {
     });
 
     bucket.grantReadWrite(handler);
+    //
+    // const api = new RestApi(this, "upload-api", {
+    //   restApiName: "nimgur upload handler",
+    //   description: "nimgur upload handler",
+    //   binaryMediaTypes: ["image/*"],
+    //   deployOptions: {
+    //     throttlingBurstLimit: 10,
+    //     throttlingRateLimit: 3,
+    //   }
+    // });
+    //
+    // const method = api.root.addResource('up').addMethod(
+    //   "POST",
+    //   new LambdaIntegration(handler, {
+    //     requestTemplates: { "application/json": '{ "statusCode": "200" }' },
+    //   }),
+    //   // {
+    //   // apiKeyRequired: true,
+    //   // }
+    // );
 
-    const api = new RestApi(this, "upload-api", {
-      restApiName: "nimgur upload handler",
-      description: "nimgur upload handler",
-      binaryMediaTypes: ["image/*"],
-    });
+    // const deployment = new Deployment(this, 'nimgur-deployment', { api });
+    // const stage = new Stage(this, 'prod', {
+    //   deployment,
+    //   methodOptions: {
+    //     '/*/*': {  // This special path applies to all resource paths and all HTTP methods
+    //       throttlingRateLimit: 5,
+    //       throttlingBurstLimit: 20
+    //     }
+    //   }
+    // });
 
-    api.root.addResource('up').addMethod(
-      "POST",
-      new LambdaIntegration(handler, {
-        requestTemplates: { "application/json": '{ "statusCode": "200" }' },
-      })
-    );
+    // const key = api.addApiKey('ApiKey');
+    //
+    // const plan = api.addUsagePlan('UsagePlan', {
+    //   name: 'Basic',
+    //   apiKey: key,
+    //   throttle: {
+    //     rateLimit: 10,
+    //     burstLimit: 2
+    //   }
+    // });
+    //
+    // plan.addApiStage({
+    //   stage: api.deploymentStage,
+    // });
 
     const staticOrigin = new S3Origin(bucket, {
       originPath: "static/",
@@ -76,7 +113,7 @@ export class NimgurStack extends Stack {
         "/up": {
           allowedMethods: AllowedMethods.ALLOW_ALL,
           origin: new HttpOrigin(
-            `${api.restApiId}.execute-api.${this.region}.${this.urlSuffix}`,
+            `123.execute-api.${this.region}.${this.urlSuffix}`,
             {
               originPath: 'prod/'
             }
