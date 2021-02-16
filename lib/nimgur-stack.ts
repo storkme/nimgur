@@ -43,26 +43,26 @@ export class NimgurStack extends Stack {
     });
 
     bucket.grantReadWrite(handler);
-    //
-    // const api = new RestApi(this, "upload-api", {
-    //   restApiName: "nimgur upload handler",
-    //   description: "nimgur upload handler",
-    //   binaryMediaTypes: ["image/*"],
-    //   deployOptions: {
-    //     throttlingBurstLimit: 10,
-    //     throttlingRateLimit: 3,
-    //   }
-    // });
-    //
-    // const method = api.root.addResource('up').addMethod(
-    //   "POST",
-    //   new LambdaIntegration(handler, {
-    //     requestTemplates: { "application/json": '{ "statusCode": "200" }' },
-    //   }),
-    //   // {
-    //   // apiKeyRequired: true,
-    //   // }
-    // );
+
+    const api = new RestApi(this, "upload-api", {
+      restApiName: "nimgur upload handler",
+      description: "nimgur upload handler",
+      binaryMediaTypes: ["image/*"],
+      deployOptions: {
+        throttlingBurstLimit: 10,
+        throttlingRateLimit: 3,
+      }
+    });
+
+    const method = api.root.addResource('up').addMethod(
+      "POST",
+      new LambdaIntegration(handler, {
+        requestTemplates: { "application/json": '{ "statusCode": "200" }' },
+      }),
+      // {
+      // apiKeyRequired: true,
+      // }
+    );
 
     // const deployment = new Deployment(this, 'nimgur-deployment', { api });
     // const stage = new Stage(this, 'prod', {
@@ -113,7 +113,7 @@ export class NimgurStack extends Stack {
         "/up": {
           allowedMethods: AllowedMethods.ALLOW_ALL,
           origin: new HttpOrigin(
-            `123.execute-api.${this.region}.${this.urlSuffix}`,
+            `${api.restApiId}.execute-api.${this.region}.${this.urlSuffix}`,
             {
               originPath: 'prod/'
             }
