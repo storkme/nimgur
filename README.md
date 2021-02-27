@@ -1,8 +1,17 @@
 # storkme/nimgur
 
-TODO: update since this refactor
+## required steps for github actions
 
-Really simple AWS stack using lambdas, a CDN, and S3 to let you upload images and provide a link. Like a command-line imgur, without the website.
+set up the two env vars: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+
+Generate the access keys by running: 
+```shell
+aws iam create-access-key --user-name "nimgur-api-ecr-rw"
+```
+
+And add them here https://github.com/USERNAME/REPO/settings/secrets/actions
+
+## TODO: update since this refactor
 
 ## How to use it?
 
