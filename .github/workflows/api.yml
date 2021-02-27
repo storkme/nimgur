@@ -36,6 +36,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: nimgur-api
+          GITHUB_SHA: ${{ github.sha }}
         with:
           host: ${{ secrets.DEPLOY_SSH_HOST }}
           username: ${{ secrets.DEPLOY_SSH_USER }}
@@ -45,6 +46,7 @@ jobs:
           envs: GITHUB_SHA,ECR_REGISTRY,ECR_REPOSITORY
           debug: true
           script: |
+            env
             docker-compose -f /var/www/not.gd/nimgur/api/deployment/docker-compose-dev.yml up --force-recreate --build -d api
       - name: Deploy (SSH)
         uses: appleboy/ssh-action@v0.1.4
@@ -52,6 +54,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: nimgur-api
+          GITHUB_SHA: ${{ github.sha }}
         with:
           host: ${{ secrets.DEPLOY_SSH_HOST }}
           username: ${{ secrets.DEPLOY_SSH_USER }}
