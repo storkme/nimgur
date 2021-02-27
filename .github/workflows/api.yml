@@ -43,5 +43,5 @@ jobs:
           script: |
             export TAG=$GITHUB_SHA
             export REGISTRY_URI=$ECR_REGISTRY/$ECR_REPOSITORY
-            cd /usr/src/app/deployment
+            cd /usr/src/app/api/deployment
             docker-compose -f /usr/src/app/deployment/docker-compose-dev.yml restart api
