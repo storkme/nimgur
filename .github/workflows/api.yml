@@ -33,6 +33,9 @@ jobs:
       - name: Deploy (DEV) (SSH)
         uses: appleboy/ssh-action@v0.1.4
         if: github.ref == 'refs/heads/dev'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: nimgur-api
         with:
           host: ${{ secrets.DEPLOY_SSH_HOST }}
           username: ${{ secrets.DEPLOY_SSH_USER }}
@@ -46,6 +49,9 @@ jobs:
       - name: Deploy (SSH)
         uses: appleboy/ssh-action@v0.1.4
         if: github.ref == 'refs/heads/master'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: nimgur-api
         with:
           host: ${{ secrets.DEPLOY_SSH_HOST }}
           username: ${{ secrets.DEPLOY_SSH_USER }}
