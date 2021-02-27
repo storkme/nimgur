@@ -8,9 +8,8 @@ const logger = pino();
 
 app.use(logger);
 
-app.get('/healthz', (req, res) => {
-  req.log.info('well this is dumb');
+app.get('/healthz', (_req, res) => {
   res.sendStatus(204);
-})
+});
 
 app.listen(8041);

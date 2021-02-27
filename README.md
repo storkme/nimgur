@@ -6,10 +6,12 @@ set up the two env vars: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
 
 Generate the access keys by running: 
 ```shell
-aws iam create-access-key --user-name "nimgur-api-ecr-rw"
+aws iam create-access-key --user-name "nimgur-api-ecr-rw" \
+  | jq -r '.AccessKey | "AWS_ACCESS_KEY_ID=\(.AccessKeyId)\nAWS_SECRET_ACCESS_KEY=\(.SecretAccessKey)"'
+
 ```
 
-And add them here https://github.com/USERNAME/REPO/settings/secrets/actions
+And add the two secrets here https://github.com/USERNAME/REPO/settings/secrets/actions
 
 ## TODO: update since this refactor
 
