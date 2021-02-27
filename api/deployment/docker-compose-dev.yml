@@ -2,10 +2,9 @@ version: '3'
 services:
   api:
     container_name: nimgur-api-dev
-    image: "324962621698.dkr.ecr.eu-west-1.amazonaws.com/nimgur-api:${TAG}"
+    image: "${REGISTRY_URI}:${TAG}"
     ports:
       - "8040:8041" # map the service port to 8040 for staging
     environment:
       - NODE_ENV=dev
-      - ENV
     command: ["node", "dist/index.js"]

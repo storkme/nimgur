@@ -1,0 +1,10 @@
+version: '3'
+services:
+  api:
+    container_name: nimgur-api-dev
+    image: "${REGISTRY_URI}:${TAG}"
+    ports:
+      - "8041" # map the service port to 8040 for staging
+    environment:
+      - NODE_ENV=prod
+    command: ["node", "dist/index.js"]
