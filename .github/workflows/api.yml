@@ -32,17 +32,15 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
       - name: Deploy (SSH)
         uses: appleboy/ssh-action@v0.1.4
-        env:
-          REGISTRY_URI: ${{ secrets.REGISTRY_URI }}
         with:
           host: ${{ secrets.DEPLOY_SSH_HOST }}
           username: ${{ secrets.DEPLOY_SSH_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           passphrase: ${{ secrets.DEPLOY_SSH_KEY_PASSPHRASE }}
-          envs: GITHUB_SHA,ECR_REGISTRY
+          envs: GITHUB_SHA,ECR_REGISTRY,ECR_REPOSITORY
           debug: true
           script: |
-            export TAG=GITHUB_SHA
-            export REGISTRY_URI=ECR_REGISTRY
+            export TAG=$GITHUB_SHA
+            export REGISTRY_URI=$ECR_REGISTRY/$ECR_REPOSITORY
             cd /usr/src/app/deployment
             docker-compose -f /usr/src/app/deployment/docker-compose-dev.yml restart api
