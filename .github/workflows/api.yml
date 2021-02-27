@@ -42,8 +42,6 @@ jobs:
           envs: GITHUB_SHA,ECR_REGISTRY,ECR_REPOSITORY
           debug: true
           script: |
-            export TAG=$GITHUB_SHA
-            export REGISTRY_URI=$ECR_REGISTRY/$ECR_REPOSITORY
             docker-compose -f /var/www/not.gd/nimgur/api/deployment/docker-compose-dev.yml restart api
       - name: Deploy (SSH)
         uses: appleboy/ssh-action@v0.1.4
@@ -57,6 +55,4 @@ jobs:
           envs: GITHUB_SHA,ECR_REGISTRY,ECR_REPOSITORY
           debug: true
           script: |
-            export TAG=$GITHUB_SHA
-            export REGISTRY_URI=$ECR_REGISTRY/$ECR_REPOSITORY
             docker-compose -f /var/www/not.gd/nimgur/api/deployment/docker-compose-live.yml restart api
