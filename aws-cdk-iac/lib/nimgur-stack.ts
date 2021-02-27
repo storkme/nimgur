@@ -87,10 +87,10 @@ export class NimgurStack extends Stack {
       },
     });
 
-    const repository = new Repository(this, 'nimgur-api');
+    const repository = new Repository(this, 'nimgur-api', { repositoryName: 'nimgur-api' });
 
-    const repositoryReadWriteUser = new User(this, 'nimgur-api-ecr-rw', {userName: 'nimgur-api-ecr-rw'});
-    const repositoryReadUser = new User(this, 'nimgur-api-ecr-r', {userName: 'nimgur-api-ecr-r'});
+    const repositoryReadWriteUser = new User(this, 'nimgur-api-ecr-rw', { userName: 'nimgur-api-ecr-rw' });
+    const repositoryReadUser = new User(this, 'nimgur-api-ecr-r', { userName: 'nimgur-api-ecr-r' });
 
     AuthorizationToken.grantRead(repositoryReadWriteUser);
     repository.grantPullPush(repositoryReadWriteUser);
