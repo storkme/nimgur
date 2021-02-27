@@ -42,7 +42,7 @@ jobs:
           envs: GITHUB_SHA,ECR_REGISTRY,ECR_REPOSITORY
           debug: true
           script: |
-            docker-compose -f /var/www/not.gd/nimgur/api/deployment/docker-compose-dev.yml restart api
+            docker-compose -f /var/www/not.gd/nimgur/api/deployment/docker-compose-dev.yml up --force-recreate --build -d api
       - name: Deploy (SSH)
         uses: appleboy/ssh-action@v0.1.4
         if: github.ref == 'refs/heads/master'
@@ -55,4 +55,4 @@ jobs:
           envs: GITHUB_SHA,ECR_REGISTRY,ECR_REPOSITORY
           debug: true
           script: |
-            docker-compose -f /var/www/not.gd/nimgur/api/deployment/docker-compose-live.yml restart api
+            docker-compose -f /var/www/not.gd/nimgur/api/deployment/docker-compose-live.yml up --force-recreate --build -d api
