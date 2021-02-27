@@ -43,4 +43,4 @@ jobs:
           script: |
             export TAG=$GITHUB_SHA
             export REGISTRY_URI=$ECR_REGISTRY/$ECR_REPOSITORY
-            docker-compose -f /usr/src/app/deployment/docker-compose-dev.yml restart api
+            docker-compose -f ~/code/nimgur/api/deployment/docker-compose-dev.yml restart api
