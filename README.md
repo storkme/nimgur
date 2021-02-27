@@ -1,5 +1,7 @@
 # storkme/nimgur
 
+TODO: update since this refactor
+
 Really simple AWS stack using lambdas, a CDN, and S3 to let you upload images and provide a link. Like a command-line imgur, without the website.
 
 ## How to use it?
