@@ -47,6 +47,7 @@ jobs:
           debug: true
           script: |
             env
+            echo ${{ github.sha }}
             docker-compose -f /var/www/not.gd/nimgur/api/deployment/docker-compose-dev.yml up --force-recreate --build -d api
       - name: Deploy (SSH)
         uses: appleboy/ssh-action@v0.1.4
