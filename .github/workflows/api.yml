@@ -43,6 +43,9 @@ jobs:
             export GITHUB_SHA=${{ github.sha }}
             export ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
             export ECR_REPOSITORY=nimgur-api
+            aws ecr get-login-password | docker login \
+                --username AWS \
+                --password-stdin "$ECR_REGISTRY"
             docker-compose -f /var/www/not.gd/nimgur/api/deployment/docker-compose-dev.yml up --force-recreate --build -d api
       - name: Deploy (SSH)
         uses: appleboy/ssh-action@v0.1.4
@@ -58,4 +61,7 @@ jobs:
             export GITHUB_SHA=${{ github.sha }}
             export ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
             export ECR_REPOSITORY=nimgur-api
+            aws ecr get-login-password | docker login \
+                --username AWS \
+                --password-stdin "$ECR_REGISTRY"
             docker-compose -f /var/www/not.gd/nimgur/api/deployment/docker-compose-live.yml up --force-recreate --build -d api
