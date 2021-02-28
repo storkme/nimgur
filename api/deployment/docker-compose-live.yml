@@ -6,5 +6,7 @@ services:
     ports:
       - "8041" # map the service port to 8040 for staging
     environment:
-      - NODE_ENV=prod
+      - NODE_ENV: prod
+      - NIMGUR_AWS_ACCESS_KEY_ID: "${NIMGUR_AWS_ACCESS_KEY_ID}"
+      - NIMGUR_AWS_ACCESS_KET_SECRET: "${NIMGUR_AWS_ACCESS_KET_SECRET}"
     command: ["node", "dist/index.js"]
