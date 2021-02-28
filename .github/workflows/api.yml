@@ -45,7 +45,7 @@ jobs:
             export ECR_REPOSITORY=nimgur-api
             cd /var/www/not.gd/nimgur/api/deployment/
             aws ecr get-login-password | docker login --username AWS --password-stdin "$ECR_REGISTRY"
-            docker-compose -f docker-compose-dev.yml up --force-recreate --build -d api
+            docker-compose -f docker-compose-dev.yml up --env-file .env --force-recreate --build -d api
       - name: Deploy (SSH)
         uses: appleboy/ssh-action@v0.1.4
         if: github.ref == 'refs/heads/master'
@@ -62,4 +62,4 @@ jobs:
             export ECR_REPOSITORY=nimgur-api
             cd /var/www/not.gd/nimgur/api/deployment/
             aws ecr get-login-password | docker login --username AWS --password-stdin "$ECR_REGISTRY"
-            docker-compose -f docker-compose-live.yml up --force-recreate --build -d api
+            docker-compose -f docker-compose-live.yml up --env-file .env --force-recreate --build -d api
