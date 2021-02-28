@@ -1,9 +1,7 @@
 import express from 'express';
 
 import pino from 'pino-http';
-
-
-console.log('loaded AWS Key ID: ', process.env['NIMGUR_AWS_ACCESS_KEY_ID']);
+import { middleware, up } from './routes/up';
 
 const app = express();
 const logger = pino();
@@ -14,8 +12,6 @@ app.get('/healthz', (_req, res) => {
   res.sendStatus(204);
 });
 
-// app.get('/up', async (req, res) => {
-//
-// });
+app.post('/up', ...middleware, up);
 
 app.listen(8041);

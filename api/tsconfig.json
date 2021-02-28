@@ -35,8 +35,6 @@
     "noFallthroughCasesInSwitch": true,
     /* Report errors for fallthrough cases in switch statement. */
     "noUncheckedIndexedAccess": true,
-    /* Include 'undefined' in index signature results */
-    "noPropertyAccessFromIndexSignature": true,
     /* Require undeclared properties from index signatures to use element accesses. */
 
     "esModuleInterop": true,
