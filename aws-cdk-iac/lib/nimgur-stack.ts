@@ -12,7 +12,6 @@ import {
 } from "@aws-cdk/aws-cloudfront";
 import { HttpOrigin, S3Origin } from "@aws-cdk/aws-cloudfront-origins";
 import { Certificate } from "@aws-cdk/aws-certificatemanager";
-import { SecurityGroup, Vpc } from "@aws-cdk/aws-ec2";
 import { AttributeType, Table } from "@aws-cdk/aws-dynamodb";
 import { AuthorizationToken, Repository } from '@aws-cdk/aws-ecr';
 import { User } from '@aws-cdk/aws-iam';
@@ -33,10 +32,6 @@ export class NimgurStack extends Stack {
       "not-gd-cert",
       process.env.ARN_CERTIFICATE
     );
-    const vpc = new Vpc(this, "nimgur-vpc");
-    const securityGroup = new SecurityGroup(this, "nimgur-securitygroup", {
-      vpc,
-    });
 
     const bucket = new Bucket(this, "nimgur");
 
@@ -69,9 +64,6 @@ export class NimgurStack extends Stack {
         logLevel: LogLevel.INFO,
         tsconfig: "tsconfig.json",
       },
-
-      securityGroups: [securityGroup],
-      vpc,
     });
 
     bucket.grantReadWrite(handler);

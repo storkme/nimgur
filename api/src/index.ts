@@ -12,4 +12,8 @@ app.get('/healthz', (_req, res) => {
   res.sendStatus(204);
 });
 
+// app.get('/up', async (req, res) => {
+//
+// });
+
 app.listen(8041);
