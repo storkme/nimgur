@@ -3,6 +3,8 @@ import express from 'express';
 import pino from 'pino-http';
 
 
+console.log('loaded AWS Key ID: ', process.env.NIMGUR_AWS_ACCESS_KEY_ID);
+
 const app = express();
 const logger = pino();
 
