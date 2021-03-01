@@ -15,5 +15,5 @@ RUN npx tsc && npm --loglevel=warn prune --production
 #FROM scratch
 #COPY --from=build /usr/src/app/ /usr/src/app/
 #WORKDIR /usr/src/app/
-CMD ["node", "dist/index.js"]
+CMD ["npm", "start"]
 EXPOSE 8041
