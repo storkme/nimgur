@@ -2,25 +2,22 @@ name: Nimgur API Workflow
 on:
   push:
     branches: [ master, dev ]
-  pull_request:
-    branches: [ master, dev ]
   workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - id: checkout
         uses: actions/checkout@v2
-      - name: Configure AWS credentials
+      - id: configure-aws-credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-1
-      - name: Login to Amazon ECR
-        id: login-ecr
+      - id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-      - name: Build, tag, and push image to Amazon ECR
+      - id: build-push
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: nimgur-api
@@ -30,7 +27,7 @@ jobs:
           cd api
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-      - name: Deploy (DEV) (SSH)
+      - id: deploy-dev
         uses: appleboy/ssh-action@v0.1.4
         if: github.ref == 'refs/heads/dev'
         with:
@@ -46,7 +43,7 @@ jobs:
             cd /var/www/not.gd/nimgur/api/deployment/
             aws ecr get-login-password | docker login --username AWS --password-stdin "$ECR_REGISTRY"
             docker-compose --env-file .env -f docker-compose-dev.yml up --force-recreate --build -d api
-      - name: Deploy (SSH)
+      - id: deploy
         uses: appleboy/ssh-action@v0.1.4
         if: github.ref == 'refs/heads/master'
         with:
