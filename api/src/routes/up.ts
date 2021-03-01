@@ -11,7 +11,7 @@ const fileHandlers = {
 
 const fileTypes = Object.keys(fileHandlers);
 
-export function up(req: Request, res: Response): void {
+export function route(req: Request, res: Response): void {
   const matchContentType = fileTypes.some(type => req.header('content-type')?.startsWith(type));
   if (!matchContentType) {
     res.status(415).send({ error: 'unsupported_media_type' });
@@ -20,7 +20,7 @@ export function up(req: Request, res: Response): void {
   const { body } = req;
   const hash = createHash("sha256").update(body).digest().toString("hex");
 
-  req.log.info('inside up fn');
+  req.log?.info('inside up fn');
 
   res.status(200).send({ hash });
 }
