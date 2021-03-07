@@ -19,14 +19,14 @@ const fileTypes = Object.keys(fileHandlers);
 export function route(context: AppContext): RequestHandler {
   return async (req: Request, res) => {
     const matchContentType = fileTypes.some(type => req.header('content-type')?.startsWith(type));
-    const fileExt = fileHandlers[req.header('content-type') as keyof (typeof fileHandlers)];
+    const contentType = req.header('content-type') as keyof (typeof fileHandlers);
+    const fileExt = fileHandlers[contentType];
     const { body } = req;
     if (!matchContentType || !fileExt || !body) {
       res.status(415).send({ error: 'unsupported_media_type' });
       return;
     }
     const hash = createHash("sha256").update(body).digest().toString("hex");
-    const contentType = res.header('content-type');
 
     // noinspection LoopStatementThatDoesntLoopJS
     for await (const { id, fileExt } of await context.data.query<Image>(
@@ -71,7 +71,7 @@ export function route(context: AppContext): RequestHandler {
           Bucket: process.env.BUCKET_ARN!,
           ContentType: contentType,
           Key: `images/${image.id}.${image.fileExt}`,
-          Body: body,
+          Body: body as Buffer,
         })
         .promise(),
     ]);
