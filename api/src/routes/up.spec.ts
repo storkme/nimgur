@@ -16,5 +16,7 @@ describe('routes/up', () => {
       expect(send).toHaveBeenCalledWith({ error: 'unsupported_media_type' });
       expect(route).toBeTruthy();
     });
+
+    it('should ')
   });
 });
