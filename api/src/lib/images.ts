@@ -4,11 +4,11 @@ import {
   rangeKey,
   table,
 } from "@aws/dynamodb-data-mapper-annotations";
+import { Request } from 'express';
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 @table(process.env.TABLE_IMAGES!)
 export class Image {
-  constructor() {
-  }
 
   @hashKey({ type: "String" })
   id?: string;
@@ -32,7 +32,7 @@ export class Image {
   contentType?: string;
 
   @attribute({ type: "Any" })
-  event?: any;
+  req?: Request;
 
   @attribute({ type: "Set", memberType: "String" })
   tags?: Set<string>;

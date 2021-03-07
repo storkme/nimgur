@@ -19,12 +19,12 @@ const fileTypes = Object.keys(fileHandlers);
 export function route(context: AppContext): RequestHandler {
   return async (req: Request, res) => {
     const matchContentType = fileTypes.some(type => req.header('content-type')?.startsWith(type));
-    if (!matchContentType) {
+    const fileExt = fileHandlers[req.header('content-type') as keyof (typeof fileHandlers)];
+    const { body } = req;
+    if (!matchContentType || !fileExt || !body) {
       res.status(415).send({ error: 'unsupported_media_type' });
       return;
     }
-    const { ext } = fileHandlers[req.header('content-type')];
-    const { body } = req;
     const hash = createHash("sha256").update(body).digest().toString("hex");
     const contentType = res.header('content-type');
 
@@ -39,12 +39,10 @@ export function route(context: AppContext): RequestHandler {
       }
     )) {
       req.log?.info('hash hit', { hash });
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          href: `https://${process.env.CDN_HOST}/${id}.${fileExt}`,
-        }),
-      };
+      res.status(200).send({
+        href: `https://${process.env.CDN_HOST}/${id}.${fileExt}`,
+      })
+      return;
     }
 
     const tags = (req.header("x-nimgur-tags") ?? "")
@@ -57,7 +55,7 @@ export function route(context: AppContext): RequestHandler {
         id: generateString(),
         sourceIp:
           req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
-        fileExt: ext,
+        fileExt,
         event: { ...req, body: null },
         contentType,
         hash,
@@ -69,20 +67,18 @@ export function route(context: AppContext): RequestHandler {
       context.data.put(image),
       new S3()
         .putObject({
-          Bucket: process.env.BUCKET_ARN,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          Bucket: process.env.BUCKET_ARN!,
           ContentType: contentType,
           Key: `images/${image.id}.${image.fileExt}`,
-          Body: file,
+          Body: body,
         })
         .promise(),
     ]);
 
-    return {
-      statusCode: 201,
-      body: JSON.stringify({
-        href: `https://${process.env.CDN_HOST}/${image.id}.${image.fileExt}`,
-      }),
-    };
+    res.status(201).send({
+      href: `https://${process.env.CDN_HOST}/${image.id}.${image.fileExt}`,
+    });
   }
 }
 
