@@ -86,8 +86,9 @@ export class NimgurStack extends Stack {
     AuthorizationToken.grantRead(repositoryReadWriteUser);
     repository.grantPullPush(repositoryReadWriteUser);
 
-    const imageTableUser = new User(this, 'nimgur-table-images', { userName: 'nimgur-table-images' });
-    imagesTable.grantFullAccess(imageTableUser);
+    const apiUser = new User(this, 'nimgur-api', { userName: 'nimgur-api' });
+    imagesTable.grantFullAccess(apiUser);
+    bucket.grantPut(apiUser);
 
     // TODO: can the CDK create access keys and output them to be used with github?
     // const apiRWAccessKey = new CfnAccessKey(this, 'nimgur-api-ecr-rw-key', {
