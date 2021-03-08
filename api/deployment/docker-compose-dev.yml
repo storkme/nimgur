@@ -4,7 +4,7 @@ services:
     container_name: nimgur-api-dev
     image: "${ECR_REGISTRY}/${ECR_REPOSITORY}:${GITHUB_SHA}"
     ports:
-      - "8040:8041" # map the service port to 8040 for staging
+      - "8040:80" # map the service port to 8040 for staging
     environment:
       - NODE_ENV=dev
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}

@@ -1,9 +1,10 @@
-import express from 'express';
+import express  from 'express';
 import pino from 'pino-http';
 import * as up from './routes/up';
 import { AppContext } from './lib/types';
 import { DataMapper } from '@aws/dynamodb-data-mapper';
 import { DynamoDB } from 'aws-sdk';
+import { Router } from '@awaitjs/express';
 
 const app = express();
 const logger = pino();
@@ -15,6 +16,9 @@ const context: AppContext = {
 
 app.use(logger);
 
-app.post('/up', ...up.middleware, up.route(context));
+const router = Router();
 
-app.listen(8041);
+router.postAsync('/up', ...up.middleware, up.route(context));
+app.use(router);
+
+app.listen(process.env.NODE_PORT ? parseInt(process.env.NODE_PORT) : 80);

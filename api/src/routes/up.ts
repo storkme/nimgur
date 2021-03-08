@@ -6,6 +6,7 @@ import { S3 } from 'aws-sdk';
 import { AppContext } from '../lib/types';
 import { RequestHandler } from 'express-serve-static-core';
 import { Image } from '../lib/images';
+import { stdSerializers } from 'pino';
 
 const fileHandlers = {
   "image/png": { ext: "png" },
@@ -49,20 +50,20 @@ export function route(context: AppContext): RequestHandler {
       .split(",")
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
-    const image = {
-      ...new Image(),
-      ...{
+    const image = Object.assign(
+      new Image(),
+      {
         id: generateString(),
         sourceIp:
           req.header("x-real-ip"), //just use nginx's real ip header
         fileExt,
-        req: { ...req, body: null },
+        req: stdSerializers.req(req),
         contentType,
         hash,
         tags: new Set<string>(tags),
         createdAt: new Date(),
       },
-    };
+    );
     await Promise.all([
       context.data.put(image),
       new S3()

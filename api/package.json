@@ -25,6 +25,7 @@
     "typescript": "4.1.x"
   },
   "dependencies": {
+    "@awaitjs/express": "^0.7.2",
     "@aws/dynamodb-data-mapper-annotations": "^0.7.3",
     "aws-sdk": "^2.854.0",
     "body-parser": "^1.19.0",
