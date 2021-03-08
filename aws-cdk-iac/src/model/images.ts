@@ -29,7 +29,7 @@ export class Image {
   contentType: string;
 
   @attribute({ type: "Any" })
-  event: any;
+  req: any;
 
   @attribute({ type: "Set", memberType: "String" })
   tags: Set<string>;

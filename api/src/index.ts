@@ -9,7 +9,7 @@ const app = express();
 const logger = pino();
 const context: AppContext = {
   data: new DataMapper({
-    client: new DynamoDB(),
+    client: new DynamoDB({ region: 'eu-west-1' }),
   })
 }
 

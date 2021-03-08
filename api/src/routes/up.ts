@@ -54,9 +54,9 @@ export function route(context: AppContext): RequestHandler {
       ...{
         id: generateString(),
         sourceIp:
-          req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+          req.header("x-real-ip"), //just use nginx's real ip header
         fileExt,
-        event: { ...req, body: null },
+        req: { ...req, body: null },
         contentType,
         hash,
         tags: new Set<string>(tags),
