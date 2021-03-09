@@ -1,33 +1,37 @@
-import { Request } from 'express';
-import bodyParser from 'body-parser';
-import { createHash } from 'crypto';
-import { generateString } from '../lib/utils';
-import { S3 } from 'aws-sdk';
-import { AppContext } from '../lib/types';
-import { RequestHandler } from 'express-serve-static-core';
-import { Image } from '../lib/images';
-import { stdSerializers } from 'pino';
+import { Request } from "express";
+import bodyParser from "body-parser";
+import { createHash } from "crypto";
+import { generateString } from "../lib/utils";
+import { S3 } from "aws-sdk";
+import { AppContext } from "../lib/types";
+import { RequestHandler } from "express-serve-static-core";
+import { Image } from "../lib/images";
+import { stdSerializers } from "pino";
 
 const fileHandlers = {
   "image/png": { ext: "png" },
   "image/jpeg": { ext: "jpg" },
   "image/jpg": { ext: "jpg" },
   "image/webp": { ext: "webp" },
-}
+};
 
 const fileTypes = Object.keys(fileHandlers);
 
 export function route(context: AppContext): RequestHandler {
   return async (req: Request, res) => {
-    const matchContentType = fileTypes.some(type => req.header('content-type')?.startsWith(type));
-    const contentType = req.header('content-type') as keyof (typeof fileHandlers);
+    const matchContentType = fileTypes.some((type) =>
+      req.header("content-type")?.startsWith(type)
+    );
+    const contentType = req.header("content-type") as keyof typeof fileHandlers;
     const fileExt = fileHandlers[contentType];
     const { body } = req;
     if (!matchContentType || !fileExt || !body) {
-      res.status(415).send({ error: 'unsupported_media_type' });
+      res.status(415).send({ error: "unsupported_media_type" });
       return;
     }
-    req.log?.info('body type', typeof body);
+    req.log?.info(`body type: ${typeof body}`);
+    req.log?.info(body);
+    console.log(body);
     const hash = createHash("sha256").update(body).digest().toString("hex");
 
     // noinspection LoopStatementThatDoesntLoopJS
@@ -40,10 +44,10 @@ export function route(context: AppContext): RequestHandler {
         limit: 1,
       }
     )) {
-      req.log?.info('hash hit', { hash });
+      req.log?.info("hash hit", { hash });
       res.status(200).send({
         href: `https://${process.env.CDN_HOST}/${id}.${fileExt}`,
-      })
+      });
       return;
     }
 
@@ -51,20 +55,16 @@ export function route(context: AppContext): RequestHandler {
       .split(",")
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
-    const image = Object.assign(
-      new Image(),
-      {
-        id: generateString(),
-        sourceIp:
-          req.header("x-real-ip"), //just use nginx's real ip header
-        fileExt,
-        req: stdSerializers.req(req),
-        contentType,
-        hash,
-        tags: new Set<string>(tags),
-        createdAt: new Date(),
-      },
-    );
+    const image = Object.assign(new Image(), {
+      id: generateString(),
+      sourceIp: req.header("x-real-ip"), //just use nginx's real ip header
+      fileExt,
+      req: stdSerializers.req(req),
+      contentType,
+      hash,
+      tags: new Set<string>(tags),
+      createdAt: new Date(),
+    });
     await Promise.all([
       context.data.put(image),
       new S3()
@@ -81,12 +81,12 @@ export function route(context: AppContext): RequestHandler {
     res.status(201).send({
       href: `https://${process.env.CDN_HOST}/${image.id}.${image.fileExt}`,
     });
-  }
+  };
 }
 
-export const middleware = Object.entries(fileHandlers).map(([type]) => {
-  return bodyParser.raw({
+export const middleware = Object.keys(fileHandlers).map((type) =>
+  bodyParser.raw({
     type,
-    limit: '10mb',
+    limit: "10mb",
   })
-});
+);
