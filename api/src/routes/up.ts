@@ -27,6 +27,7 @@ export function route(context: AppContext): RequestHandler {
       res.status(415).send({ error: 'unsupported_media_type' });
       return;
     }
+    req.log?.info('body type', typeof body);
     const hash = createHash("sha256").update(body).digest().toString("hex");
 
     // noinspection LoopStatementThatDoesntLoopJS
