@@ -18,7 +18,7 @@ const fileHandlers = {
 const fileTypes = Object.keys(fileHandlers);
 
 export function route(context: AppContext): RequestHandler {
-  return async (req: Request, res) => {
+  return async (req, res) => {
     const matchContentType = fileTypes.some((type) =>
       req.header("content-type")?.startsWith(type)
     );
@@ -84,9 +84,15 @@ export function route(context: AppContext): RequestHandler {
   };
 }
 
-export const middleware = Object.keys(fileHandlers).map((type) =>
-  bodyParser.raw({
-    type,
-    limit: "10mb",
-  })
-);
+export const middleware = [
+  ...Object.keys(fileHandlers).map((type) =>
+    bodyParser.raw({
+      type,
+      limit: "10mb",
+    })
+  ),
+  (req, res, next) => {
+    console.log("middleware test");
+    next();
+  },
+];
