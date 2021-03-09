@@ -46,6 +46,7 @@ jobs:
             export ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
             export ECR_REPOSITORY=nimgur-api
             cd /var/www/not.gd/nimgur/api/deployment/
+            git pull
             aws ecr get-login-password | docker login --username AWS --password-stdin "$ECR_REGISTRY"
             docker-compose --env-file .env -f docker-compose-dev.yml up --force-recreate --build -d api
       - id: deploy
@@ -63,5 +64,6 @@ jobs:
             export ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
             export ECR_REPOSITORY=nimgur-api
             cd /var/www/not.gd/nimgur/api/deployment/
+            git pull
             aws ecr get-login-password | docker login --username AWS --password-stdin "$ECR_REGISTRY"
             docker-compose --env-file .env -f docker-compose-live.yml up --force-recreate --build -d api

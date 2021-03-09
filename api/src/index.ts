@@ -1,4 +1,5 @@
-import express  from 'express';
+import 'source-map-support/register';
+import express from 'express';
 import pino from 'pino-http';
 import * as up from './routes/up';
 import { AppContext } from './lib/types';

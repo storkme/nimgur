@@ -1,5 +1,20 @@
 # storkme/nimgur
 
+an image hosting service.
+
+this service uses|for
+----:|--------------
+aws s3|hosting image files
+aws dynamodb|storing image metadata
+aws cloudfront|caching and http stuff
+aws ecr|storing prod docker images|
+aws cdk|for managing the above infrastructure
+github actions|for building and deploying the REST API to my personal server 
+
+note that this service by default captures all kinds of personal data (GDPR) so if it's being used for anything other than personal use make sure you get that consent.
+
+### TODO: architecture diagram here ###
+
 ## required steps for github actions
 
 set up the two env vars: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
@@ -13,30 +28,7 @@ aws iam create-access-key --user-name "nimgur-api-ecr-rw" \
 
 And add the two secrets here https://github.com/USERNAME/REPO/settings/secrets/actions
 
-## TODO: update since this refactor
 
-## How to use it?
-
-### Pre-reqs
-
-You need the AWS CLI set up for this.
-
-You need to set up some stuff manually before this will work. You'll need a domain that you own (for the CDN) and a certificate set up for that domain. Set the following env vars:
-* `CDN_HOST` → the domain name you want to host it on 
-* `ARN_CERTIFICATE` → the ARN of the certificate for the above domains
-
-And install the NPM packages:
-```shell
-$ npm install
-```
-
-### Deploy
-
-The following command will set up this stack and put it in AWS.
-
-```shell
-$ npm run cdk deploy
-```
 
 ### Hit it
 
