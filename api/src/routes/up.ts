@@ -93,8 +93,4 @@ export const middleware = [
       limit: "10mb",
     })
   ),
-  (_: Request, __: Response, next: NextFunction): void => {
-    console.log("middleware test");
-    next();
-  },
 ];
