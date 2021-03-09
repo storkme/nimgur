@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { NextFunction, Request, Response } from "express";
 import bodyParser from "body-parser";
 import { createHash } from "crypto";
 import { generateString } from "../lib/utils";
@@ -18,7 +18,7 @@ const fileHandlers = {
 const fileTypes = Object.keys(fileHandlers);
 
 export function route(context: AppContext): RequestHandler {
-  return async (req, res) => {
+  return async (req, res, next) => {
     const matchContentType = fileTypes.some((type) =>
       req.header("content-type")?.startsWith(type)
     );
@@ -29,58 +29,60 @@ export function route(context: AppContext): RequestHandler {
       res.status(415).send({ error: "unsupported_media_type" });
       return;
     }
-    req.log?.info(`body type: ${typeof body}`);
-    req.log?.info(body);
-    console.log(body);
     const hash = createHash("sha256").update(body).digest().toString("hex");
 
-    // noinspection LoopStatementThatDoesntLoopJS
-    for await (const { id, fileExt } of await context.data.query<Image>(
-      Image,
-      { hash: hash },
-      {
-        indexName: "i_hash",
-        projection: ["id", "fileExt"],
-        limit: 1,
+    try {
+      // noinspection LoopStatementThatDoesntLoopJS
+      for await (const { id, fileExt } of await context.data.query<Image>(
+        Image,
+        { hash: hash },
+        {
+          indexName: "i_hash",
+          projection: ["id", "fileExt"],
+          limit: 1,
+        }
+      )) {
+        req.log?.info("hash hit", { hash });
+        res.status(200).send({
+          href: `https://${process.env.CDN_HOST}/${id}.${fileExt}`,
+        });
+        return;
       }
-    )) {
-      req.log?.info("hash hit", { hash });
-      res.status(200).send({
-        href: `https://${process.env.CDN_HOST}/${id}.${fileExt}`,
+
+      const tags = (req.header("x-nimgur-tags") ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+      const image = Object.assign(new Image(), {
+        id: generateString(),
+        sourceIp: req.header("x-real-ip"), //just use nginx's real ip header
+        fileExt,
+        req: stdSerializers.req(req),
+        contentType,
+        hash,
+        tags: new Set<string>(tags),
+        createdAt: new Date(),
       });
-      return;
+      await Promise.all([
+        context.data.put(image),
+        new S3()
+          .putObject({
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            Bucket: process.env.BUCKET_ARN!,
+            ContentType: contentType,
+            Key: `images/${image.id}.${image.fileExt}`,
+            Body: body as Buffer,
+          })
+          .promise(),
+      ]);
+
+      res.status(201).send({
+        href: `https://${process.env.CDN_HOST}/${image.id}.${image.fileExt}`,
+      });
+    } catch (e) {
+      // do something more intelligent to handle this error?
+      next(e);
     }
-
-    const tags = (req.header("x-nimgur-tags") ?? "")
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-    const image = Object.assign(new Image(), {
-      id: generateString(),
-      sourceIp: req.header("x-real-ip"), //just use nginx's real ip header
-      fileExt,
-      req: stdSerializers.req(req),
-      contentType,
-      hash,
-      tags: new Set<string>(tags),
-      createdAt: new Date(),
-    });
-    await Promise.all([
-      context.data.put(image),
-      new S3()
-        .putObject({
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          Bucket: process.env.BUCKET_ARN!,
-          ContentType: contentType,
-          Key: `images/${image.id}.${image.fileExt}`,
-          Body: body as Buffer,
-        })
-        .promise(),
-    ]);
-
-    res.status(201).send({
-      href: `https://${process.env.CDN_HOST}/${image.id}.${image.fileExt}`,
-    });
   };
 }
 
@@ -91,7 +93,7 @@ export const middleware = [
       limit: "10mb",
     })
   ),
-  (req, res, next) => {
+  (_: Request, __: Response, next: NextFunction): void => {
     console.log("middleware test");
     next();
   },
