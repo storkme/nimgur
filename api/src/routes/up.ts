@@ -22,7 +22,7 @@ export function route(context: AppContext): RequestHandler {
       req.header("content-type")?.startsWith(type)
     );
     const contentType = req.header("content-type") as keyof typeof fileHandlers;
-    const { fileExt } = fileHandlers[contentType];
+    const fileExt = fileHandlers[contentType]?.fileExt;
     const { body } = req;
     if (!matchContentType || !fileExt || !body) {
       res.status(415).send({ error: "unsupported_media_type" });
