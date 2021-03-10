@@ -14,20 +14,17 @@ const fileHandlers = {
   "image/webp": { fileExt: "webp" },
 };
 
-const fileTypes = Object.keys(fileHandlers);
-
 export function route(context: AppContext): RequestHandler {
   return async (req, res, next) => {
-    const matchContentType = fileTypes.some((type) =>
+    const matchContentType = Object.entries(fileHandlers).find(([type]) =>
       req.header("content-type")?.startsWith(type)
     );
-    const contentType = req.header("content-type") as keyof typeof fileHandlers;
-    const fileExt = fileHandlers[contentType]?.fileExt;
     const { body } = req;
-    if (!matchContentType || !fileExt || !body) {
+    if (!matchContentType || !body) {
       res.status(415).send({ error: "unsupported_media_type" });
       return;
     }
+    const [contentType, { fileExt }] = matchContentType;
     const hash = createHash("sha256").update(body).digest().toString("hex");
 
     try {
@@ -41,12 +38,14 @@ export function route(context: AppContext): RequestHandler {
           limit: 1,
         }
       )) {
-        req.log?.info("hash hit", { hash });
+        req.log?.child({ hash }).debug("cache hit");
         res.status(200).send({
           href: `https://${process.env.CDN_HOST}/${id}.${fileExt}`,
         });
         return;
       }
+
+      req.log?.child({ hash }).debug("cache miss");
 
       const tags = (req.header("x-nimgur-tags") ?? "")
         .split(",")
