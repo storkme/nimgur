@@ -38,14 +38,13 @@ export function route(context: AppContext): RequestHandler {
           limit: 1,
         }
       )) {
-        req.log?.child({ hash }).debug("cache hit");
-        res.status(200).send({
+        const responseBody = {
           href: `https://${process.env.CDN_HOST}/${id}.${fileExt}`,
-        });
+        };
+        req.log?.child({ hash, responseBody }).debug("cache hit");
+        res.status(200).send(responseBody);
         return;
       }
-
-      req.log?.child({ hash }).debug("cache miss");
 
       const tags = (req.header("x-nimgur-tags") ?? "")
         .split(",")
@@ -74,9 +73,13 @@ export function route(context: AppContext): RequestHandler {
           .promise(),
       ]);
 
-      res.status(201).send({
+      const responseBody = {
         href: `https://${process.env.CDN_HOST}/${image.id}.${image.fileExt}`,
-      });
+      };
+
+      req.log?.child({ hash, fileExt, responseBody }).debug("cache miss");
+
+      res.status(201).send(responseBody);
     } catch (e) {
       // do something more intelligent to handle this error?
       next(e);
