@@ -17,5 +17,6 @@ const context: AppContext = {
 app.use(logger);
 
 app.post("/up", ...up.middleware, up.route(context));
+app.put("/up", ...up.middleware, up.route(context));
 
 app.listen(process.env.NODE_PORT ? parseInt(process.env.NODE_PORT) : 80);

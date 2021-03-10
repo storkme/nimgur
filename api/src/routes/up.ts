@@ -8,10 +8,10 @@ import { Image } from "../lib/images";
 import { stdSerializers } from "pino";
 
 const fileHandlers = {
-  "image/png": { ext: "png" },
-  "image/jpeg": { ext: "jpg" },
-  "image/jpg": { ext: "jpg" },
-  "image/webp": { ext: "webp" },
+  "image/png": { fileExt: "png" },
+  "image/jpeg": { fileExt: "jpg" },
+  "image/jpg": { fileExt: "jpg" },
+  "image/webp": { fileExt: "webp" },
 };
 
 const fileTypes = Object.keys(fileHandlers);
@@ -22,7 +22,7 @@ export function route(context: AppContext): RequestHandler {
       req.header("content-type")?.startsWith(type)
     );
     const contentType = req.header("content-type") as keyof typeof fileHandlers;
-    const fileExt = fileHandlers[contentType];
+    const { fileExt } = fileHandlers[contentType];
     const { body } = req;
     if (!matchContentType || !fileExt || !body) {
       res.status(415).send({ error: "unsupported_media_type" });
@@ -34,7 +34,7 @@ export function route(context: AppContext): RequestHandler {
       // noinspection LoopStatementThatDoesntLoopJS
       for await (const { id, fileExt } of await context.data.query<Image>(
         Image,
-        { hash: hash },
+        { hash },
         {
           indexName: "i_hash",
           projection: ["id", "fileExt"],
