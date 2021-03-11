@@ -8,7 +8,7 @@ import { DynamoDB } from "aws-sdk";
 
 const app = express();
 const logger = pino({
-  useLevel: process.env.NODE_ENV === "dev" ? "debug" : "info",
+  level: process.env.NODE_ENV === "dev" ? "debug" : "info",
 });
 const context: AppContext = {
   data: new DataMapper({
