@@ -46,6 +46,8 @@ export function route(context: AppContext): RequestHandler {
         return;
       }
 
+      console.log("typeof body: " + typeof body);
+
       const tags = (req.header("x-nimgur-tags") ?? "")
         .split(",")
         .map((s) => s.trim())
