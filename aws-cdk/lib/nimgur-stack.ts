@@ -1,9 +1,5 @@
-import { Construct, Stack, StackProps, Tags } from "@aws-cdk/core";
+import { CfnOutput, Construct, Stack, StackProps, Tags } from "@aws-cdk/core";
 import { Bucket } from "@aws-cdk/aws-s3";
-import { LambdaIntegration, RestApi } from "@aws-cdk/aws-apigateway";
-import { LogLevel, NodejsFunction } from "@aws-cdk/aws-lambda-nodejs";
-import { join } from "path";
-import { Runtime } from "@aws-cdk/aws-lambda";
 import {
   AllowedMethods,
   Distribution,
@@ -13,15 +9,19 @@ import {
 import { HttpOrigin, S3Origin } from "@aws-cdk/aws-cloudfront-origins";
 import { Certificate } from "@aws-cdk/aws-certificatemanager";
 import { AttributeType, Table } from "@aws-cdk/aws-dynamodb";
-import { AuthorizationToken, Repository } from '@aws-cdk/aws-ecr';
-import { User } from '@aws-cdk/aws-iam';
+import { AuthorizationToken, Repository } from "@aws-cdk/aws-ecr";
+import { User } from "@aws-cdk/aws-iam";
 
 export class NimgurStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    if (!process.env.ARN_CERTIFICATE || !process.env.CDN_HOST) {
-      throw new Error("Missing ARN_CERTIFICATE and/or CDN_HOST env vars");
+    if (
+      !process.env.ARN_CERTIFICATE ||
+      !process.env.CDN_HOST ||
+      !process.env.API_HOST
+    ) {
+      throw new Error("Missing ARN_CERTIFICATE/CDN_HOST/API_HOST env vars");
     }
 
     // The code that defines your stack goes here
@@ -29,7 +29,7 @@ export class NimgurStack extends Stack {
 
     const cert = Certificate.fromCertificateArn(
       this,
-      "not-gd-cert",
+      "cert",
       process.env.ARN_CERTIFICATE
     );
 
@@ -48,45 +48,20 @@ export class NimgurStack extends Stack {
       },
     });
 
-    const handler = new NodejsFunction(this, "upload", {
-      memorySize: 128,
-      entry: join(__dirname, "../src/upload.ts"),
-      handler: "main",
-      runtime: Runtime.NODEJS_14_X,
-      description: "nimgur upload function",
-      environment: {
-        BUCKET_ARN: bucket.bucketName,
-        CDN_HOST: process.env.CDN_HOST,
-        TABLE_IMAGES: imagesTable.tableName,
-      },
-      bundling: {
-        target: "node14",
-        logLevel: LogLevel.INFO,
-        tsconfig: "tsconfig.json",
-      },
+    const repository = new Repository(this, "nimgur-api", {
+      repositoryName: "nimgur-api",
     });
 
-    bucket.grantReadWrite(handler);
-    imagesTable.grantReadWriteData(handler);
-
-    const api = new RestApi(this, "upload-api", {
-      restApiName: "nimgur upload handler",
-      description: "nimgur upload handler",
-      binaryMediaTypes: ["image/*"],
-      deployOptions: {
-        throttlingBurstLimit: 10,
-        throttlingRateLimit: 3,
-      },
+    const repositoryReadWriteUser = new User(this, "nimgur-api-ecr-rw", {
+      userName: "nimgur-api-ecr-rw",
     });
-
-    const repository = new Repository(this, 'nimgur-api', { repositoryName: 'nimgur-api' });
-
-    const repositoryReadWriteUser = new User(this, 'nimgur-api-ecr-rw', { userName: 'nimgur-api-ecr-rw' });
 
     AuthorizationToken.grantRead(repositoryReadWriteUser);
     repository.grantPullPush(repositoryReadWriteUser);
 
-    const apiUser = new User(this, 'nimgur-api', { userName: 'nimgur-api' });
+    const apiUser = new User(this, "nimgur-api-user", {
+      userName: "nimgur-api",
+    });
     imagesTable.grantFullAccess(apiUser);
     bucket.grantPut(apiUser);
 
@@ -103,13 +78,6 @@ export class NimgurStack extends Stack {
     //
     // new CfnOutput(this, 'apiWAccessKey-accessKeyId', { value: apiRAccessKey.accessKeyId });
     // new CfnOutput(this, 'apiWAccessKey-secretAccessKey', { value: apiRAccessKey.accessKeySecretAccessKey });
-
-    const method = api.root.addResource("up").addMethod(
-      "POST",
-      new LambdaIntegration(handler, {
-        requestTemplates: { "application/json": '{ "statusCode": "200" }' },
-      })
-    );
 
     const staticOrigin = new S3Origin(bucket, {
       originPath: "static/",
@@ -142,22 +110,7 @@ export class NimgurStack extends Stack {
         "/up": {
           allowedMethods: AllowedMethods.ALLOW_ALL,
           originRequestPolicy: nimgurHeadersPolicy,
-          origin: new HttpOrigin(
-            `${api.restApiId}.execute-api.${this.region}.${this.urlSuffix}`,
-            {
-              originPath: "prod/",
-            }
-          ),
-        },
-        "/up2": {
-          allowedMethods: AllowedMethods.ALLOW_ALL,
-          originRequestPolicy: nimgurHeadersPolicy,
-          origin: new HttpOrigin(
-            `${api.restApiId}.execute-api.${this.region}.${this.urlSuffix}`,
-            {
-              originPath: "prod/",
-            }
-          ),
+          origin: new HttpOrigin(process.env.API_HOST!),
         },
       },
     });
