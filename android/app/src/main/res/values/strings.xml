@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">nimgur</string>
+    <string name="upload_err">Something went wrong: <tt>%s</tt></string>
+    <string name="edit_url_summary">You need to provide the URL of the upload endpoint. If you got this app from storkme, ask storkme!</string>
+    <string name="send_text">Uploading image (%s) to <tt>%s</tt></string>
+    <string name="btn_open_prefs">Edit upload URL</string>
+    <string name="edit_url_hint">https://whatever/upload</string>
+    <string name="button_retry">Retry</string>
 </resources>

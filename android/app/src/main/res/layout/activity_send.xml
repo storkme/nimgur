@@ -4,13 +4,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.SendActivity">
+    android:padding="12dp"
+    tools:context=".SendActivity">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/text_send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/send_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button_retry"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="doing the thing"
-        tools:layout_editor_absoluteX="156dp"
-        tools:layout_editor_absoluteY="339dp" />
+        android:text="@string/button_retry"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_send" />
+
+    <EditText
+        android:id="@+id/edit_url"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textUri"
+        android:hint="@string/edit_url_hint"
+        app:layout_constraintEnd_toStartOf="@+id/button_retry"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_send" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,9 +1,5 @@
-package gd.not.i.nimgur.net
+package gd.not.nimgur.net
 
-import android.content.ContentResolver
-import android.content.Intent
-import android.net.Uri
-import android.os.Parcelable
 import com.android.volley.NetworkResponse
 import com.android.volley.ParseError
 import com.android.volley.Request
@@ -15,10 +11,10 @@ import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
 
 abstract class NimgurRequest(
-    private val contentResolver: ContentResolver,
-    private val intent: Intent,
-    url: String?,
-    listener: Response.ErrorListener?
+    url: String,
+    private val body: ByteArray,
+    private val bodyContentType: String,
+    listener: Response.ErrorListener
 ) :
     Request<JSONObject>(
         Method.POST,
@@ -26,15 +22,9 @@ abstract class NimgurRequest(
         listener
     ) {
 
-    override fun getBody(): ByteArray {
-        val uri = intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as Uri
-        val inputStream = contentResolver.openInputStream(uri)
-        inputStream!!.buffered().use {
-            return it.readBytes()
-        }
-    }
+    override fun getBody() = body
 
-    override fun getBodyContentType() = intent.type!!
+    override fun getBodyContentType() = bodyContentType
 
     override fun parseNetworkResponse(response: NetworkResponse): Response<JSONObject>? {
         return try {
