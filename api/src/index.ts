@@ -7,7 +7,9 @@ import { DataMapper } from "@aws/dynamodb-data-mapper";
 import { DynamoDB } from "aws-sdk";
 
 const app = express();
-const logger = pino();
+const logger = pino({
+  level: "debug",
+});
 const context: AppContext = {
   data: new DataMapper({
     client: new DynamoDB({ region: "eu-west-1" }),
