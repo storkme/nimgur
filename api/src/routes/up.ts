@@ -25,7 +25,11 @@ export function route(context: AppContext): RequestHandler {
       return;
     }
     const [contentType, { fileExt }] = matchContentType;
-    const hash = createHash("sha256").update(body).digest().toString("hex");
+    const hash = createHash("sha256")
+      .update(body)
+      .update(process.env.CACHE_HASH_SALT as string)
+      .digest()
+      .toString("hex");
 
     try {
       // noinspection LoopStatementThatDoesntLoopJS
@@ -74,6 +78,8 @@ export function route(context: AppContext): RequestHandler {
           })
           .promise(),
       ]);
+
+      res.setHeader("x-nimgur-hash", hash);
 
       const responseBody = {
         href: `https://${process.env.CDN_HOST}/${image.id}.${image.fileExt}`,

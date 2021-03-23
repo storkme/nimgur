@@ -12,3 +12,4 @@ services:
       - BUCKET_ARN=${BUCKET_ARN}
       - CDN_HOST=${CDN_HOST}
       - TABLE_IMAGES=${TABLE_IMAGES}
+      - CACHE_HASH_SALT=${CACHE_HASH_SALT}

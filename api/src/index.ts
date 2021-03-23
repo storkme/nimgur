@@ -2,6 +2,7 @@ import "source-map-support/register";
 import express from "express";
 import pino from "pino-http";
 import * as up from "./routes/up";
+import * as images from "./routes/images";
 import { AppContext } from "./lib/types";
 import { DataMapper } from "@aws/dynamodb-data-mapper";
 import { DynamoDB } from "aws-sdk";
@@ -20,5 +21,6 @@ app.use(logger);
 
 app.post("/up", ...up.middleware, up.route(context));
 app.put("/up", ...up.middleware, up.route(context));
+app.delete("/images/:imageId", images.del(context));
 
 app.listen(process.env.NODE_PORT ? parseInt(process.env.NODE_PORT) : 80);
