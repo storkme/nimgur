@@ -7,10 +7,11 @@ export function del(context: AppContext): RequestHandler {
   return async (req, res, next) => {
     try {
       const suppliedHash = req.header("x-nimgur-hash");
-      const id = req.query.imageId;
+      const id = req.params.imageId;
       if (!suppliedHash) {
         res.status(400).send({ error: "missing_hash_header" });
       }
+      console.log("checking for image: ", id);
       // noinspection LoopStatementThatDoesntLoopJS
       for await (const { hash, fileExt } of await context.data.query<Image>(
         Image,
