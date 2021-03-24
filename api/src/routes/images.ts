@@ -11,35 +11,27 @@ export function del(context: AppContext): RequestHandler {
       if (!suppliedHash) {
         res.status(400).send({ error: "missing_hash_header" });
       }
-      console.log("checking for image: ", id);
-      // noinspection LoopStatementThatDoesntLoopJS
-      for await (const { hash, fileExt } of await context.data.query<Image>(
-        Image,
-        { id },
-        {
-          projection: ["hash", "fileExt"],
-          limit: 1,
-        }
-      )) {
-        if (suppliedHash !== hash) {
-          res.status(404).send({ error: "no_match" });
-        }
-        await Promise.all([
-          context.data.delete<Image>(Object.assign(new Image(), { id, hash })),
-          new S3()
-            .deleteObject({
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              Bucket: process.env.BUCKET_ARN!,
-              Key: `images/${id}.${fileExt}`,
-            })
-            .promise(),
-        ]);
-        req.log?.child({ hash }).debug("deleted image");
-        res.status(204).send();
-        return;
-      }
+      console.log("checking for image:", id);
+      const { hash, fileExt } = await context.data.get(
+        Object.assign(new Image(), { id })
+      );
 
-      res.status(404).send({ error: "no_match" });
+      if (suppliedHash !== hash) {
+        res.status(404).send({ error: "no_match" });
+      }
+      await Promise.all([
+        context.data.delete<Image>(Object.assign(new Image(), { id, hash })),
+        new S3()
+          .deleteObject({
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            Bucket: process.env.BUCKET_ARN!,
+            Key: `images/${id}.${fileExt}`,
+          })
+          .promise(),
+      ]);
+      req.log?.child({ hash }).debug("deleted image");
+      res.status(204).send();
+      return;
     } catch (error) {
       next(error);
     }
