@@ -11,10 +11,18 @@ export function del(context: AppContext): RequestHandler {
       if (!suppliedHash) {
         res.status(400).send({ error: "missing_hash_header" });
       }
-      const { hash, fileExt } = await context.data.get(
-        Object.assign(new Image(), { id })
-      );
+      let hash, fileExt;
+      try {
+        const result = await context.data.get(
+          Object.assign(new Image(), { id })
+        );
 
+        hash = result.hash;
+        fileExt = result.fileExt;
+      } catch (err) {
+        res.status(404).send({ error: "id_not_found", id });
+        return;
+      }
       if (suppliedHash !== hash) {
         res.status(404).send({ error: "no_match" });
         return;
