@@ -11,16 +11,16 @@ export function del(context: AppContext): RequestHandler {
       if (!suppliedHash) {
         res.status(400).send({ error: "missing_hash_header" });
       }
-      console.log("checking for image:", id);
       const { hash, fileExt } = await context.data.get(
         Object.assign(new Image(), { id })
       );
 
       if (suppliedHash !== hash) {
         res.status(404).send({ error: "no_match" });
+        return;
       }
       await Promise.all([
-        context.data.delete<Image>(Object.assign(new Image(), { id, hash })),
+        context.data.delete<Image>(Object.assign(new Image(), { id })),
         new S3()
           .deleteObject({
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -31,7 +31,6 @@ export function del(context: AppContext): RequestHandler {
       ]);
       req.log?.child({ hash }).debug("deleted image");
       res.status(204).send();
-      return;
     } catch (error) {
       next(error);
     }
