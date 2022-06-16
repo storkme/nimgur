@@ -38,6 +38,6 @@
     "@aws/dynamodb-data-mapper": "^0.7.3",
     "@aws/dynamodb-data-mapper-annotations": "^0.7.3",
     "aws-sdk": "^2.843.0",
-    "source-map-support": "^0.5.16"
+    "source-map-support": "^0.5.21"
   }
 }
